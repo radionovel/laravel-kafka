@@ -1,0 +1,41 @@
+{
+	"name": "radionovel/laravel-kafka",
+	"description": "Laravel Kafka",
+	"type": "library",
+	"keywords": [],
+	"license": "BSD-3-Clause",
+	"authors": [
+		{
+			"name": "Andrey Radionov",
+			"email": "andrey.radionoff@gmail.com"
+		}
+	],
+	"support": {
+		"issues": "https://github.com/radionovel/laravel-kafka/issues?state=open",
+		"source": "https://github.com/radionovel/laravel-kafka"
+	},
+	"require": {
+        "php": ">=8.0"
+    },
+	"require-dev": {
+		"php": ">=8.0",
+		"phpunit/phpunit": "^9.5.25"
+	},
+	"autoload": {
+		"psr-4": {
+			"RlKafka\\": "src/"
+		}
+	},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RlKafka\\Providers\\RlKafkaServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
