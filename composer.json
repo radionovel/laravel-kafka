@@ -15,7 +15,8 @@
 		"source": "https://github.com/radionovel/laravel-kafka"
 	},
 	"require": {
-        "php": ">=8.0"
+        "php": ">=8.0",
+        "ext-rdkafka": "*"
     },
 	"require-dev": {
 		"php": ">=8.0",
