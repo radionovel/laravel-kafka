@@ -16,10 +16,10 @@
 	},
 	"require": {
         "php": ">=8.1",
-        "illuminate/container": "^v9.19.0",
-        "illuminate/console": "^v9.19.0",
-        "illuminate/database": "^v9.19.0",
-        "illuminate/support": "^v9.19.0",
+        "illuminate/container": ">=9.0.0",
+        "illuminate/console": ">=9.0.0",
+        "illuminate/database": ">=9.0.0",
+        "illuminate/support": ">=v9.0.0",
         "ext-rdkafka": "*"
     },
 	"require-dev": {
