@@ -21,7 +21,7 @@ class RlKafkaConsumer
     ];
 
     private Logger $logger;
-
+    protected int $consumerTimeOut;
     /**
      * @param  \RdKafka\KafkaConsumer  $consumer
      * @param  \Radionovel\Hydrator\Hydrator  $hydrator
@@ -29,11 +29,12 @@ class RlKafkaConsumer
     public function __construct(private KafkaConsumer $consumer, private Hydrator $hydrator)
     {
         $this->logger = app(Logger::class);
+        $this->consumerTimeOut = config('rlkafka.kafka.consumer_timeout_ms', 2000);
     }
 
     /**
      * @throws \RdKafka\Exception
-     * @throws \App\Exceptions\RlKafkaConsumerException
+     * @throws RlKafkaConsumerException
      */
     public function consume()
     {
@@ -42,7 +43,7 @@ class RlKafkaConsumer
         );
 
         while (true) {
-            $message = $this->consumer->consume(config('rlkafka.kafka.consumer_timeout_ms', 2000));
+            $message = $this->consumer->consume($this->consumerTimeOut);
             if (RD_KAFKA_RESP_ERR_NO_ERROR === $message->err) {
                 $this->handleMessage($message);
                 continue;
@@ -61,7 +62,22 @@ class RlKafkaConsumer
      */
     private function getTopics(): array
     {
-        return config('rlkafka.handlers');
+        $topics = array_keys($this->getHandlers());
+
+        $topics = array_map(function ($topicWithEventType) {
+            [$topic, ] = explode(':', $topicWithEventType);
+            return $topic;
+        }, $topics);
+
+        return array_unique($topics);
+    }
+
+    /**
+     * @return array
+     */
+    private function getHandlers(): array
+    {
+        return config('rlkafka.handlers', []);
     }
 
     /**
@@ -73,15 +89,15 @@ class RlKafkaConsumer
      */
     private function handleMessage(Message $message): void
     {
-        $topics = $this->getTopics();
+        $handlers = $this->getHandlers();
         $handlerIdentify = $this->resolveHandlerIdentifier($message);
-
-        if (!array_key_exists($handlerIdentify, $topics)) {
+        if (!array_key_exists($handlerIdentify, $handlers)) {
+            echo 'ecnothing' > PHP_EOL;
             return;
         }
 
-        if (is_string($topics[$handlerIdentify])) {
-            $handler = app()->make($topics[$handlerIdentify]);
+        if (is_string($handlers[$handlerIdentify])) {
+            $handler = app()->make($handlers[$handlerIdentify]);
             $payload = $this->makeTypedPayload($handler, $message->payload);
             $handler->handle($payload);
         }
@@ -113,7 +129,7 @@ class RlKafkaConsumer
         $methodReflection = $reflection->getMethod('handle');
         $parameters = $methodReflection->getParameters();
 
-        if (count($parameters) === 0) {
+        if (count($parameters) === 0 || $parameters[0]->getType() === null) {
             return null;
         }
 
