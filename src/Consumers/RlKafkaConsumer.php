@@ -38,6 +38,13 @@ class RlKafkaConsumer
      */
     public function consume()
     {
+        $topics = $this->getTopics();
+
+        if (count($topics) === 0) {
+            $this->logger->error('Handlers is not configurated');
+            return;
+        }
+
         $this->consumer->subscribe(
             $this->getTopics()
         );
