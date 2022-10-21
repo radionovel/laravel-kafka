@@ -84,6 +84,7 @@ class RlKafkaConsumer
             $handler = app()->make($topics[$handlerIdentify]);
             $payload = $this->makeTypedPayload($handler, $message->payload);
             $handler->handle($payload);
+            $this->consumer->commitAsync();
         }
     }
 
