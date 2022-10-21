@@ -24,7 +24,7 @@ class ProduceCommand extends Command
 
             foreach ($messages as $message) {
                 $producer->produce($message->topic, $message->payload, $message->key, $message->event_type);
-                $message->update(['status' => 'complete']);
+                $message->update(['status' => 'completed']);
             }
 
             $messageCount = Message::query()
