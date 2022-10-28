@@ -8,7 +8,6 @@ use RlKafka\Console\Commands\ProduceCommand;
 use RlKafka\Consumers\RlKafkaConsumer;
 use RlKafka\Producers\RlKafkaProducer;
 use Illuminate\Support\ServiceProvider;
-use Radionovel\Hydrator\Hydrator;
 
 class RlKafkaServiceProvider extends ServiceProvider
 {
@@ -37,9 +36,7 @@ class RlKafkaServiceProvider extends ServiceProvider
             }
 
             $consumer = new \RdKafka\KafkaConsumer($config);
-            $hydrator = $this->app->make(Hydrator::class);
-
-            return new RlKafkaConsumer($consumer, $hydrator);
+            return new RlKafkaConsumer($consumer);
         });
 
         $this->app->bind(RlKafkaProducer::class, function () {
