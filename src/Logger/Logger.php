@@ -14,10 +14,20 @@ class Logger
      *
      * @return void
      */
-    public function error(Message $message): void
+    public function errorMessage(Message $message): void
     {
         Log::error(
             sprintf('Kafka consumer error: [%d] %s' . PHP_EOL, $message->err,  $message->errstr())
         );
+    }
+
+    /**
+     * @param  string  $message
+     *
+     * @return void
+     */
+    public function error(string $message): void
+    {
+        Log::error($message);
     }
 }

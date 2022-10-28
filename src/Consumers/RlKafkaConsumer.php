@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace RlKafka\Consumers;
 
-use RlKafka\Exceptions\RlKafkaConsumerException;
-use RlKafka\Logger\Logger;
-use Radionovel\Hydrator\Hydrator;
 use RdKafka\KafkaConsumer;
 use RdKafka\Message;
-use ReflectionNamedType;
+use RlKafka\Exceptions\RlKafkaConsumerException;
+use RlKafka\Logger\Logger;
 
 class RlKafkaConsumer
 {
@@ -22,11 +20,11 @@ class RlKafkaConsumer
 
     private Logger $logger;
     protected int $consumerTimeOut;
+
     /**
      * @param  \RdKafka\KafkaConsumer  $consumer
-     * @param  \Radionovel\Hydrator\Hydrator  $hydrator
      */
-    public function __construct(private KafkaConsumer $consumer, private Hydrator $hydrator)
+    public function __construct(private KafkaConsumer $consumer)
     {
         $this->logger = app(Logger::class);
         $this->consumerTimeOut = config('rlkafka.kafka.consumer_timeout_ms', 2000);
@@ -35,13 +33,14 @@ class RlKafkaConsumer
     /**
      * @throws \RdKafka\Exception
      * @throws RlKafkaConsumerException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function consume()
     {
         $topics = $this->getTopics();
 
         if (count($topics) === 0) {
-            $this->logger->error('Handlers is not configurated');
+            $this->logger->error('Handlers have\'t configuration');
             return;
         }
 
@@ -57,7 +56,7 @@ class RlKafkaConsumer
             }
 
             if (!in_array($message->err, self::IGNORABLE_CONSUMER_ERRORS)) {
-                $this->logger->error($message);
+                $this->logger->errorMessage($message);
 
                 throw new RlKafkaConsumerException($message->errstr(), $message->err);
             }
@@ -92,20 +91,19 @@ class RlKafkaConsumer
      *
      * @return void
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     * @throws \ReflectionException
+     * @throws \RdKafka\Exception
      */
     private function handleMessage(Message $message): void
     {
         $handlers = $this->getHandlers();
         $handlerIdentify = $this->resolveHandlerIdentifier($message);
         if (!array_key_exists($handlerIdentify, $handlers)) {
-            echo 'ecnothing' > PHP_EOL;
             return;
         }
 
         if (is_string($handlers[$handlerIdentify])) {
             $handler = app()->make($handlers[$handlerIdentify]);
-            $payload = $this->makeTypedPayload($handler, $message->payload);
+            $payload = json_decode($message->payload, true);
             $handler->handle($payload);
             $this->consumer->commitAsync();
         }
@@ -123,47 +121,5 @@ class RlKafkaConsumer
         }
 
         return $message->topic_name;
-    }
-
-    /**
-     * @param  object  $handler
-     *
-     * @return string|null
-     * @throws \ReflectionException
-     */
-    private function getHandlerParameterType(object $handler): ?string
-    {
-        $reflection = new \ReflectionClass($handler);
-        $methodReflection = $reflection->getMethod('handle');
-        $parameters = $methodReflection->getParameters();
-
-        if (count($parameters) === 0 || $parameters[0]->getType() === null) {
-            return null;
-        }
-
-        $parameter = $parameters[0]->getType();
-        $types = $parameter instanceof ReflectionNamedType ? [$parameter] : $parameter->getTypes();
-
-        foreach ($types as $type) {
-            if ($type->isBuiltin() === false) {
-                return $type->getName();
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param  mixed  $handler
-     * @param  string  $payload
-     *
-     * @return mixed
-     * @throws \ReflectionException
-     */
-    private function makeTypedPayload(mixed $handler, string $payload): mixed
-    {
-        $handlerParameterType = $this->getHandlerParameterType($handler);
-        $payload = json_decode($payload, true);
-        return $handlerParameterType ? $this->hydrator->hydrate($handlerParameterType, $payload) : $payload;
     }
 }
