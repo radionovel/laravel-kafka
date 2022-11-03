@@ -75,5 +75,7 @@ class RlKafkaServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__."/../../config/rlkafka.php" => config_path('rlkafka.php'),
         ], 'rlkafka');
+
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
     }
 }
