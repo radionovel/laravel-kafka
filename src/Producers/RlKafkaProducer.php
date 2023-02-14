@@ -11,7 +11,7 @@ class RlKafkaProducer
 {
     const FLUSH_TIMEOUT = 1000;
 
-    public function __construct(private Producer $producer)
+    public function __construct(private readonly Producer $producer)
     {
     }
 
@@ -21,14 +21,14 @@ class RlKafkaProducer
      * @param  string|null  $key
      * @param  string  $eventType
      *
-     * @return void
+     * @return int
      */
-    public function produce(string $topic, array $payload, ?string $key = null, string $eventType = ''): void
+    public function produce(string $topic, array $payload, ?string $key = null, string $eventType = ''): int
     {
         $topic = $this->producer->newTopic($topic);
         $headers = $this->prepareHeaders($eventType);
         $topic->producev(RD_KAFKA_PARTITION_UA, 0, json_encode($payload), $key, $headers);
-        $this->producer->flush(self::FLUSH_TIMEOUT);
+        return $this->producer->flush(self::FLUSH_TIMEOUT);
     }
 
     /**

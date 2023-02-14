@@ -3,10 +3,9 @@ declare(strict_types=1);
 
 namespace RlKafka\Console\Commands;
 
-use RlKafka\Consumers\RlKafkaConsumer;
+use Illuminate\Console\Command;
 use RlKafka\Models\Message;
 use RlKafka\Producers\RlKafkaProducer;
-use Illuminate\Console\Command;
 
 class ProduceCommand extends Command
 {
@@ -23,8 +22,9 @@ class ProduceCommand extends Command
                                ->get();
 
             foreach ($messages as $message) {
-                $producer->produce($message->topic, $message->payload, $message->key, $message->event_type);
-                $message->update(['status' => 'completed']);
+                if (RD_KAFKA_RESP_ERR_NO_ERROR === $producer->produce($message->topic, $message->payload, $message->key, $message->event_type)){
+                    $message->update(['status' => 'completed']);
+                }
             }
 
             $messageCount = Message::query()
