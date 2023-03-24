@@ -12,26 +12,29 @@ class ProduceCommand extends Command
     protected $signature = 'rlkafka:produce';
     protected $description = 'Kafka consumer';
 
-    public function handle(RlKafkaProducer $producer)
+    /**
+     * @param  \RlKafka\Producers\RlKafkaProducer  $producer
+     *
+     * @return void
+     */
+    public function handle(RlKafkaProducer $producer): void
     {
-        while(true) {
+        while (true) {
             /** @var Message[] $messages */
             $messages = Message::query()
-                               ->where('status', 'pending')
-                               ->limit(20)
-                               ->get();
+                ->where('status', 'pending')
+                ->orderBy('created_at')
+                ->limit(10)
+                ->get();
 
             foreach ($messages as $message) {
-                if (RD_KAFKA_RESP_ERR_NO_ERROR === $producer->produce($message->topic, $message->payload, $message->key, $message->event_type)){
+                if (RD_KAFKA_RESP_ERR_NO_ERROR === $producer->produce($message->topic, $message->payload, $message->key,
+                        $message->event_type)) {
                     $message->update(['status' => 'completed']);
                 }
             }
 
-            $messageCount = Message::query()
-                   ->where('status', 'pending')
-                   ->count();
-
-            if ($messageCount === 0) {
+            if (count($messages) === 0) {
                 sleep(5);
             }
         }

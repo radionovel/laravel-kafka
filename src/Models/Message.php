@@ -7,6 +7,7 @@ namespace RlKafka\Models;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
+
 /**
  * @property string $uuid
  * @property string $topic
@@ -21,6 +22,7 @@ class Message extends Model
 {
     protected $table = 'kafka_log';
     protected $primaryKey = 'uuid';
+    protected $dateFormat = 'Y-m-d H:i:s.u';
 
     protected $casts = [
         'payload' => 'array',

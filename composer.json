@@ -15,13 +15,14 @@
 		"source": "https://github.com/radionovel/laravel-kafka"
 	},
 	"require": {
-        "php": ">=8.1",
-        "illuminate/container": ">=9.0.0",
-        "illuminate/console": ">=9.0.0",
-        "illuminate/database": ">=9.0.0",
-        "illuminate/support": ">=v9.0.0",
-        "ext-rdkafka": "*"
-    },
+		"php": ">=8.1",
+		"ext-rdkafka": "*",
+		"illuminate/console": ">=9.0.0",
+		"illuminate/container": ">=9.0.0",
+		"illuminate/database": ">=9.0.0",
+		"illuminate/support": ">=v9.0.0",
+		"ramsey/uuid": "^3.9"
+	},
 	"require-dev": {
         "phpunit/phpunit": "^9.5.25"
 	},
