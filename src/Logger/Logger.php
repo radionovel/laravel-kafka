@@ -17,7 +17,7 @@ class Logger
     public function errorMessage(Message $message): void
     {
         Log::error(
-            sprintf('Kafka consumer error: [%d] %s' . PHP_EOL, $message->err,  $message->errstr())
+            sprintf('Kafka consumer error: [%d] %s'.PHP_EOL, $message->err, $message->errstr())
         );
     }
 

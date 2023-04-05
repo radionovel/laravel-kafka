@@ -17,9 +17,8 @@ class RlKafkaConsumer
         RD_KAFKA_RESP_ERR_REQUEST_TIMED_OUT,
         RD_KAFKA_RESP_ERR__TIMED_OUT,
     ];
-
-    private Logger $logger;
     protected int $consumerTimeOut;
+    private Logger $logger;
 
     /**
      * @param  \RdKafka\KafkaConsumer  $consumer
@@ -71,7 +70,7 @@ class RlKafkaConsumer
         $topics = array_keys($this->getHandlers());
 
         $topics = array_map(function ($topicWithEventType) {
-            [$topic, ] = explode(':', $topicWithEventType);
+            [$topic,] = explode(':', $topicWithEventType);
             return $topic;
         }, $topics);
 

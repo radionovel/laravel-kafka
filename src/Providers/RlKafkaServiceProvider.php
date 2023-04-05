@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace RlKafka\Providers;
 
+use Illuminate\Support\ServiceProvider;
 use RlKafka\Console\Commands\ConsumeCommand;
 use RlKafka\Console\Commands\ProduceCommand;
 use RlKafka\Consumers\RlKafkaConsumer;
 use RlKafka\Producers\RlKafkaProducer;
-use Illuminate\Support\ServiceProvider;
 
 class RlKafkaServiceProvider extends ServiceProvider
 {
@@ -20,6 +20,33 @@ class RlKafkaServiceProvider extends ServiceProvider
     {
         $this->registerCommands();
         $this->configurePublishing();
+    }
+
+    /**
+     * Register the console commands for the package.
+     *
+     * @return void
+     */
+    protected function registerCommands()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ConsumeCommand::class,
+                ProduceCommand::class,
+            ]);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    private function configurePublishing()
+    {
+        $this->publishes([
+            __DIR__."/../../config/rlkafka.php" => config_path('rlkafka.php'),
+        ], 'rlkafka');
+
+        $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
     }
 
     /**
@@ -50,32 +77,5 @@ class RlKafkaServiceProvider extends ServiceProvider
             $producer = new \RdKafka\Producer($config);
             return new RlKafkaProducer($producer);
         });
-    }
-
-    /**
-     * Register the console commands for the package.
-     *
-     * @return void
-     */
-    protected function registerCommands()
-    {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                ConsumeCommand::class,
-                ProduceCommand::class,
-            ]);
-        }
-    }
-
-    /**
-     * @return void
-     */
-    private function configurePublishing()
-    {
-        $this->publishes([
-            __DIR__."/../../config/rlkafka.php" => config_path('rlkafka.php'),
-        ], 'rlkafka');
-
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
     }
 }

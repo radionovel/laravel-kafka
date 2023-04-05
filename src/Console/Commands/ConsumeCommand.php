@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace RlKafka\Console\Commands;
 
-use RlKafka\Consumers\RlKafkaConsumer;
 use Illuminate\Console\Command;
+use RlKafka\Consumers\RlKafkaConsumer;
 
 class ConsumeCommand extends Command
 {

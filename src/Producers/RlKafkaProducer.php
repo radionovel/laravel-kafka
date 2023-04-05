@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace RlKafka\Producers;
 
-use RlKafka\Models\Message;
 use RdKafka\Producer;
+use RlKafka\Models\Message;
 
 class RlKafkaProducer
 {
@@ -32,25 +32,6 @@ class RlKafkaProducer
     }
 
     /**
-     * @param  string  $topic
-     * @param  array  $payload
-     * @param  string|null  $key
-     * @param  string  $eventType
-     *
-     * @return void
-     */
-    public function produceAsync(string $topic, array $payload, ?string $key = null, string $eventType = ''): void
-    {
-        Message::create([
-            'topic' => $topic,
-            'payload' => $payload,
-            'key' => $key,
-            'event_type' => $eventType,
-            'status' => 'pending'
-        ]);
-    }
-
-    /**
      * @param  string  $eventType
      *
      * @return array
@@ -63,5 +44,24 @@ class RlKafkaProducer
         }
 
         return $headers;
+    }
+
+    /**
+     * @param  string  $topic
+     * @param  array  $payload
+     * @param  string|null  $key
+     * @param  string  $eventType
+     *
+     * @return void
+     */
+    public function produceAsync(string $topic, array $payload, ?string $key = null, string $eventType = ''): void
+    {
+        Message::create([
+            'topic'      => $topic,
+            'payload'    => $payload,
+            'key'        => $key,
+            'event_type' => $eventType,
+            'status'     => 'pending',
+        ]);
     }
 }

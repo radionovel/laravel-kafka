@@ -54,8 +54,8 @@ class ProduceCommand extends Command
     private function cleanup(): void
     {
         Message::query()
-        ->where('created_at', '<', Carbon::today())
-        ->where('status', 'completed')
-        ->delete();
+            ->where('created_at', '<', Carbon::today())
+            ->where('status', 'completed')
+            ->delete();
     }
 }
