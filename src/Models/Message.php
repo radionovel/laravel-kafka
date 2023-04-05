@@ -22,6 +22,7 @@ class Message extends Model
 {
     protected $table = 'kafka_log';
     protected $primaryKey = 'uuid';
+    protected $keyType = 'string';
     protected $dateFormat = 'Y-m-d H:i:s.u';
 
     protected $casts = [
