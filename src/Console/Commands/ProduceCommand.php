@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace RlKafka\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use RlKafka\Models\Message;
 use RlKafka\Producers\RlKafkaProducer;
@@ -20,12 +21,21 @@ class ProduceCommand extends Command
     public function handle(RlKafkaProducer $producer): void
     {
         while (true) {
-            /** @var Message[] $messages */
+            /** @var \Illuminate\Support\Collection<Message> $messages */
             $messages = Message::query()
                 ->where('status', 'pending')
                 ->orderBy('created_at')
                 ->limit(10)
                 ->get();
+
+            if (count($messages) === 0) {
+                sleep(5);
+                continue;
+            }
+
+            Message::query()
+                ->whereIn('uuid', $messages->pluck('uuid'))
+                ->update(['status' => 'processing']);
 
             foreach ($messages as $message) {
                 if (RD_KAFKA_RESP_ERR_NO_ERROR === $producer->produce($message->topic, $message->payload, $message->key,
@@ -34,9 +44,18 @@ class ProduceCommand extends Command
                 }
             }
 
-            if (count($messages) === 0) {
-                sleep(5);
-            }
+            $this->cleanup();
         }
+    }
+
+    /**
+     * @return void
+     */
+    private function cleanup(): void
+    {
+        Message::query()
+        ->where('created_at', '<', Carbon::today())
+        ->where('status', 'completed')
+        ->delete();
     }
 }
