@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     /**
@@ -12,9 +11,7 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::table('kafka_log', function (Blueprint $table) {
-            $table->enum('status', ['pending', 'completed', 'error', 'processing'])->change();
-        });
+        DB::statement("ALTER TABLE kafka_log CHANGE status status ENUM('pending', 'completed', 'error', 'processing');");
     }
 
     /**
